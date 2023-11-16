@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -21,14 +23,22 @@ public class ProductController {
     ProductRepository productRepository;
 
     @PostMapping("/save")
-    public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto){
+    public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto) {
         var productModel = new ProductModel();
         BeanUtils.copyProperties(productRecordDto, productModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(productRepository.save(productModel));
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<ProductModel>> listProduct(){
+    public ResponseEntity<List<ProductModel>> listProduct() {
         return ResponseEntity.status(HttpStatus.OK).body(productRepository.findAll());
     }
+
+    @GetMapping("list/{id}")
+    public ResponseEntity<Object> listOne(@PathVariable(value = "id") UUID idProduct) {
+        Optional<ProductModel> product = productRepository.findById(idProduct);
+        return product.<ResponseEntity<Object>>map(productModel -> ResponseEntity.status(HttpStatus.OK).body(productModel)).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found."));
+
+    }
 }
+
