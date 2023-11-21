@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/products")
@@ -50,6 +49,16 @@ public class ProductController {
         ProductModel productModel = product.get();
         BeanUtils.copyProperties(productRecordDto, productModel);
         return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(productModel));
+    }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable(value = "id") UUID idProduct){
+        Optional<ProductModel> product = productRepository.findById(idProduct);
+        if(product.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado.");
+
+        productRepository.delete(product.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Produto deletado com sucesso!");
     }
 }
 
